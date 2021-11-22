@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+flask db upgrade
+
+export FLASK_APP=flask_init.py 
+export FLASK_DEBUG=1 
+export MAIL_USERNAME=flekicacutura@gmail.com 
+export MAIL_PASSWORD=ikae0Riezax7ua5al3sheiqua9chookaichahqu8
+export CUTTINGSWAP_ADMIN=flekicacutura@gmail.com
+
+flask run
