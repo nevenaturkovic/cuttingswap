@@ -9,3 +9,4 @@ from ..decorators import admin_required, permission_required
 @main.route('/')
 def index():
     return render_template('index.html')
+    

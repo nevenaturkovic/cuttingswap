@@ -59,3 +59,10 @@ def edit_profile_admin(id):
     form.location.data = user.location
     form.about_me.data = user.about_me
     return render_template('user/edit_profile.html', form=form, user=user)
+
+@user_.route('/')
+@login_required
+@admin_required
+def list_of_users():
+    users = User.query.order_by(User.username.desc()).all()
+    return render_template('user/all.html', users=users)

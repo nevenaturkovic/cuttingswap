@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block title %}List of Users{% endblock %}
+
+{% block page_content %}
+<h1>List of Users</h1>
+<div class="list-group">
+{% for user in users %}
+    <a href="{{ url_for('.user', username=user.username) }}" class="list-group-item list-group-item-action">{{ user.username }}</a>
+{% endfor %}
+</div>
+{% endblock %}
