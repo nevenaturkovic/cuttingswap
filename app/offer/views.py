@@ -1,21 +1,33 @@
-from flask import render_template, redirect, url_for, abort, flash, request,\
-    current_app, make_response
-from flask_login import login_required, current_user
-from . import offer as offer_bp
-from .forms import OfferForm
-from .. import db
-from ..models import Permission, Role, User, Offer
-from ..decorators import admin_required, permission_required
+from flask import redirect
+from flask import render_template
+from flask import url_for
+from flask_login import current_user
+from flask_login import login_required
 
-@offer_bp.route('/new', methods=['GET', 'POST'])
+from . import offer as offer_bp
+from .. import db
+from ..decorators import admin_required
+from ..decorators import permission_required
+from ..models import Offer
+from ..models import Permission
+from ..models import Role
+from ..models import User
+from .forms import OfferForm
+
+
+@offer_bp.route("/new", methods=["GET", "POST"])
 @login_required
 def new_offer():
     form = OfferForm()
     if current_user.can(Permission.WRITE) and form.validate_on_submit():
-        offer = Offer(body=form.body.data,
-                      author=current_user._get_current_object())
+        offer = Offer(title=form.title.data, body=form.body.data, author=current_user._get_current_object())
         db.session.add(offer)
         db.session.commit()
-        return redirect(url_for('.offer'))
-    offers = Offer.query.order_by(Offer.timestamp.desc()).all()
-    return render_template('offer/newoffer.html', form=form)
+        return redirect(url_for(".offer", id=offer.id))
+    return render_template("offer/newoffer.html", form=form)
+
+
+@offer_bp.route("/<int:id>")
+def offer(id):
+    offer = Offer.query.get_or_404(id)
+    return render_template("offer/singleoffer.html", offer=offer)

@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+{% import "_macros.html" as macros %}
+
+{% block title %}CuttingSwap - {{ offer.title }}{% endblock %}
+
+{% block page_content %}
+<div class="page-header">
+    <img class="img-rounded profile-thumbnail" src="{{ offer.author.gravatar(size=256) }}">
+    <div class="profile-header">
+        <h1>{{ offer.title }}</h1>
+        <div class="post-body">{{ offer.body }}</div>
+        <div class="post-date">{{ moment(offer.timestamp).fromNow() }}</div>        
+        <div class="post-author">
+            <a href="{{ url_for('user.user', username=offer.author.username) }}">
+            {{ offer.author.username }}
+            </a>
+        </div>
+</div>
+{% endblock %}
+
