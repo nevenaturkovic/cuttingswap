@@ -1,0 +1,5 @@
+[flake8]
+ignore = E501, W503, E203, RST304, RST301
+select = A,B,C,E,F,W,T4,B9, B950, RST, C4
+doctests = True
+max-complexity = 10
