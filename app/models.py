@@ -18,12 +18,12 @@ class Permission:
 
 
 class Role(db.Model):
-    __tablename__ = 'roles'
+    __tablename__ = "roles"
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(64), unique=True)
     default = db.Column(db.Boolean, default=False, index=True)
     permissions = db.Column(db.Integer)
-    users = db.relationship('User', backref='role', lazy='dynamic')
+    users = db.relationship("User", backref="role", lazy="dynamic")
 
     def __init__(self, **kwargs):
         super(Role, self).__init__(**kwargs)
@@ -33,14 +33,22 @@ class Role(db.Model):
     @staticmethod
     def insert_roles():
         roles = {
-            'User': [Permission.FOLLOW, Permission.COMMENT, Permission.WRITE],
-            'Moderator': [Permission.FOLLOW, Permission.COMMENT,
-                          Permission.WRITE, Permission.MODERATE],
-            'Administrator': [Permission.FOLLOW, Permission.COMMENT,
-                              Permission.WRITE, Permission.MODERATE,
-                              Permission.ADMIN],
+            "User": [Permission.FOLLOW, Permission.COMMENT, Permission.WRITE],
+            "Moderator": [
+                Permission.FOLLOW,
+                Permission.COMMENT,
+                Permission.WRITE,
+                Permission.MODERATE,
+            ],
+            "Administrator": [
+                Permission.FOLLOW,
+                Permission.COMMENT,
+                Permission.WRITE,
+                Permission.MODERATE,
+                Permission.ADMIN,
+            ],
         }
-        default_role = 'User'
+        default_role = "User"
         for r in roles:
             role = Role.query.filter_by(name=r).first()
             if role is None:
@@ -48,7 +56,7 @@ class Role(db.Model):
             role.reset_permissions()
             for perm in roles[r]:
                 role.add_permission(perm)
-            role.default = (role.name == default_role)
+            role.default = role.name == default_role
             db.session.add(role)
         db.session.commit()
 
@@ -67,15 +75,15 @@ class Role(db.Model):
         return self.permissions & perm == perm
 
     def __repr__(self):
-        return '<Role %r>' % self.name
+        return "<Role %r>" % self.name
 
 
 class User(UserMixin, db.Model):
-    __tablename__ = 'users'
+    __tablename__ = "users"
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(64), unique=True, index=True)
     username = db.Column(db.String(64), unique=True, index=True)
-    role_id = db.Column(db.Integer, db.ForeignKey('roles.id'))
+    role_id = db.Column(db.Integer, db.ForeignKey("roles.id"))
     password_hash = db.Column(db.String(128))
     confirmed = db.Column(db.Boolean, default=False)
     name = db.Column(db.String(64))
@@ -84,13 +92,13 @@ class User(UserMixin, db.Model):
     member_since = db.Column(db.DateTime(), default=datetime.utcnow)
     last_seen = db.Column(db.DateTime(), default=datetime.utcnow)
     avatar_hash = db.Column(db.String(32))
-    offers = db.relationship('Offer', backref='author', lazy='dynamic')
+    offers = db.relationship("Offer", backref="author", lazy="dynamic")
 
     def __init__(self, **kwargs):
         super(User, self).__init__(**kwargs)
         if self.role is None:
-            if self.email == current_app.config['CUTTINGSWAP_ADMIN']:
-                self.role = Role.query.filter_by(name='Administrator').first()
+            if self.email == current_app.config["CUTTINGSWAP_ADMIN"]:
+                self.role = Role.query.filter_by(name="Administrator").first()
             if self.role is None:
                 self.role = Role.query.filter_by(default=True).first()
         if self.email is not None and self.avatar_hash is None:
@@ -98,7 +106,7 @@ class User(UserMixin, db.Model):
 
     @property
     def password(self):
-        raise AttributeError('password is not a readable attribute')
+        raise AttributeError("password is not a readable attribute")
 
     @password.setter
     def password(self, password):
@@ -108,33 +116,33 @@ class User(UserMixin, db.Model):
         return check_password_hash(self.password_hash, password)
 
     def generate_confirmation_token(self, expiration=3600):
-        s = Serializer(current_app.config['SECRET_KEY'], expiration)
-        return s.dumps({'confirm': self.id}).decode('utf-8')
+        s = Serializer(current_app.config["SECRET_KEY"], expiration)
+        return s.dumps({"confirm": self.id}).decode("utf-8")
 
     def confirm(self, token):
-        s = Serializer(current_app.config['SECRET_KEY'])
+        s = Serializer(current_app.config["SECRET_KEY"])
         try:
-            data = s.loads(token.encode('utf-8'))
+            data = s.loads(token.encode("utf-8"))
         except:
             return False
-        if data.get('confirm') != self.id:
+        if data.get("confirm") != self.id:
             return False
         self.confirmed = True
         db.session.add(self)
         return True
 
     def generate_reset_token(self, expiration=3600):
-        s = Serializer(current_app.config['SECRET_KEY'], expiration)
-        return s.dumps({'reset': self.id}).decode('utf-8')
+        s = Serializer(current_app.config["SECRET_KEY"], expiration)
+        return s.dumps({"reset": self.id}).decode("utf-8")
 
     @staticmethod
     def reset_password(token, new_password):
-        s = Serializer(current_app.config['SECRET_KEY'])
+        s = Serializer(current_app.config["SECRET_KEY"])
         try:
-            data = s.loads(token.encode('utf-8'))
+            data = s.loads(token.encode("utf-8"))
         except:
             return False
-        user = User.query.get(data.get('reset'))
+        user = User.query.get(data.get("reset"))
         if user is None:
             return False
         user.password = new_password
@@ -142,19 +150,20 @@ class User(UserMixin, db.Model):
         return True
 
     def generate_email_change_token(self, new_email, expiration=3600):
-        s = Serializer(current_app.config['SECRET_KEY'], expiration)
+        s = Serializer(current_app.config["SECRET_KEY"], expiration)
         return s.dumps(
-            {'change_email': self.id, 'new_email': new_email}).decode('utf-8')
+            {"change_email": self.id, "new_email": new_email}
+        ).decode("utf-8")
 
     def change_email(self, token):
-        s = Serializer(current_app.config['SECRET_KEY'])
+        s = Serializer(current_app.config["SECRET_KEY"])
         try:
-            data = s.loads(token.encode('utf-8'))
+            data = s.loads(token.encode("utf-8"))
         except:
             return False
-        if data.get('change_email') != self.id:
+        if data.get("change_email") != self.id:
             return False
-        new_email = data.get('new_email')
+        new_email = data.get("new_email")
         if new_email is None:
             return False
         if self.query.filter_by(email=new_email).first() is not None:
@@ -175,13 +184,14 @@ class User(UserMixin, db.Model):
         db.session.add(self)
 
     def gravatar_hash(self):
-        return hashlib.md5(self.email.lower().encode('utf-8')).hexdigest()
+        return hashlib.md5(self.email.lower().encode("utf-8")).hexdigest()
 
-    def gravatar(self, size=100, default='identicon', rating='g'):
-        url = 'https://secure.gravatar.com/avatar'
+    def gravatar(self, size=100, default="identicon", rating="g"):
+        url = "https://secure.gravatar.com/avatar"
         hash = self.avatar_hash or self.gravatar_hash()
-        return '{url}/{hash}?s={size}&d={default}&r={rating}'.format(
-            url=url, hash=hash, size=size, default=default, rating=rating)
+        return "{url}/{hash}?s={size}&d={default}&r={rating}".format(
+            url=url, hash=hash, size=size, default=default, rating=rating
+        )
 
 
 class AnonymousUser(AnonymousUserMixin):
@@ -191,16 +201,19 @@ class AnonymousUser(AnonymousUserMixin):
     def is_administrator(self):
         return False
 
+
 login_manager.anonymous_user = AnonymousUser
+
 
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
 
+
 class Offer(db.Model):
-    __tablename__ = 'offers'
+    __tablename__ = "offers"
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.Text)
     body = db.Column(db.Text)
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
-    author_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    author_id = db.Column(db.Integer, db.ForeignKey("users.id"))
