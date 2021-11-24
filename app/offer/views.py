@@ -28,6 +28,13 @@ def new_offer():
 
 
 @offer_bp.route("/<int:id>")
+@login_required
 def offer(id):
     offer = Offer.query.get_or_404(id)
     return render_template("offer/singleoffer.html", offer=offer)
+
+@offer_bp.route("/")
+@login_required
+def list_of_offers():
+    offers = Offer.query.order_by(Offer.timestamp.desc()).all()
+    return render_template("offer/alloffers.html", offer=offer, offers=offers)

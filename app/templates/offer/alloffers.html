@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}List of Offers{% endblock %}
+
+{% block page_content %}
+<h1>All Offers</h1>
+<ul class="posts">
+    {% for offer in offers %}
+    <li class="post">
+        <div class="profile-thumbnail">
+            <a href="{{ url_for('user.user', username=offer.author.username) }}">
+                <img class="img-rounded profile-thumbnail"
+                    src="{{ offer.author.gravatar(size=40) }}">
+            </a>
+        </div>
+        <div class="post-date">{{ moment(offer.timestamp).fromNow() }}</div>
+        <div class="post-author">
+            <a href="{{ url_for('user.user', username=offer.author.username) }}">
+                {{ offer.author.username }}
+            </a>
+        </div>
+        <div class="post-body">{{ offer.body }}</div>
+    </li>
+    {% endfor %}
+</ul>
+{% endblock %}
