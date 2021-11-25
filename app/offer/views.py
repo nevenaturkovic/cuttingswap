@@ -43,7 +43,7 @@ def new_offer():
             ] or file_ext != validate_image(uploaded_file.stream):
                 abort(400)
             uploaded_file.save(
-                os.path.join(current_app.config["UPLOAD_PATH"], filename)
+                os.path.join(files_dir, filename)
             )
         else:
             return "Invalid file.", 415
