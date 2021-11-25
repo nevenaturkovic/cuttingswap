@@ -1,12 +1,18 @@
-from datetime import datetime
 import hashlib
-from werkzeug.security import generate_password_hash, check_password_hash
+from datetime import datetime
+
+import bleach
+from flask import current_app
+from flask import request
+from flask_login import AnonymousUserMixin
+from flask_login import UserMixin
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from markdown import markdown
-import bleach
-from flask import current_app, request
-from flask_login import UserMixin, AnonymousUserMixin
-from . import db, login_manager
+from werkzeug.security import check_password_hash
+from werkzeug.security import generate_password_hash
+
+from . import db
+from . import login_manager
 
 
 class Permission:

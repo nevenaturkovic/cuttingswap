@@ -20,7 +20,11 @@ from .forms import OfferForm
 def new_offer():
     form = OfferForm()
     if current_user.can(Permission.WRITE) and form.validate_on_submit():
-        offer = Offer(title=form.title.data, body=form.body.data, author=current_user._get_current_object())
+        offer = Offer(
+            title=form.title.data,
+            body=form.body.data,
+            author=current_user._get_current_object(),
+        )
         db.session.add(offer)
         db.session.commit()
         return redirect(url_for(".offer", id=offer.id))
@@ -32,6 +36,7 @@ def new_offer():
 def offer(id):
     offer = Offer.query.get_or_404(id)
     return render_template("offer/singleoffer.html", offer=offer)
+
 
 @offer_bp.route("/")
 @login_required
