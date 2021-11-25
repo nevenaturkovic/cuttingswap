@@ -5,9 +5,8 @@ from wtforms import SelectField
 from wtforms import StringField
 from wtforms import SubmitField
 from wtforms import TextAreaField
-from wtforms import ValidationError
+from wtforms import FileField
 from wtforms.validators import DataRequired
-from wtforms.validators import Email
 from wtforms.validators import Length
 from wtforms.validators import Regexp
 
@@ -20,4 +19,5 @@ class OfferForm(FlaskForm):
     title = StringField("Title", validators=[Length(0, 64)])
     body = TextAreaField("What do you offer?", validators=[DataRequired()])
     location = StringField("Location", validators=[Length(0, 64)])
+    image = FileField("Photo", validators=[DataRequired()])
     submit = SubmitField("Submit")

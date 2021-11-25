@@ -22,7 +22,9 @@ class Config:
     CUTTINGSWAP_FOLLOWERS_PER_PAGE = 50
     CUTTINGSWAP_COMMENTS_PER_PAGE = 30
     MAX_CONTENT_LENGTH = (
-        int(os.environ.get("MAX_CONTENT_LENGTH")) or 1024 * 1024
+        int(os.environ.get("MAX_CONTENT_LENGTH"))
+        if os.environ.get("MAX_CONTENT_LENGTH")
+        else 1024 * 1024
     )
     UPLOAD_EXTENSIONS = (
         set(os.environ.get("UPLOAD_EXTENSIONS").split(";"))
