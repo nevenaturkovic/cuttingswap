@@ -21,6 +21,20 @@ class Config:
     CUTTINGSWAP_POSTS_PER_PAGE = 20
     CUTTINGSWAP_FOLLOWERS_PER_PAGE = 50
     CUTTINGSWAP_COMMENTS_PER_PAGE = 30
+    MAX_CONTENT_LENGTH = (
+        int(os.environ.get("MAX_CONTENT_LENGTH")) or 1024 * 1024
+    )
+    UPLOAD_EXTENSIONS = (
+        set(os.environ.get("UPLOAD_EXTENSIONS").split(";"))
+        if os.environ.get("UPLOAD_EXTENSIONS")
+        else {
+            ".jpg",
+            ".jpeg",
+            ".png",
+            ".gif",
+        }
+    )
+    UPLOAD_PATH = os.environ.get("UPLOAD_PATH") or "uploads"
 
     @staticmethod
     def init_app(app):
