@@ -9,8 +9,7 @@
     <li class="post">
         <div class="profile-thumbnail">
             <a href="{{ url_for('user.user', username=offer.author.username) }}">
-                <img class="img-rounded profile-thumbnail"
-                    src="{{ offer.author.gravatar(size=40) }}">
+                <img class="img-rounded profile-thumbnail" src="{{ offer.author.gravatar(size=40) }}">
             </a>
         </div>
         <div class="post-date">{{ moment(offer.timestamp).fromNow() }}</div>
