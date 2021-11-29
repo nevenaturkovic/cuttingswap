@@ -2,6 +2,7 @@ import os
 
 from flask import abort
 from flask import current_app
+from flask import flash
 from flask import redirect
 from flask import render_template
 from flask import request
@@ -16,6 +17,7 @@ from .. import db
 from ..decorators import admin_required
 from ..decorators import permission_required
 from ..models import Offer
+from ..models import OfferImage
 from ..models import Permission
 from ..models import Role
 from ..models import User
@@ -34,28 +36,42 @@ def new_offer():
             body=form.body.data,
             author=current_user._get_current_object(),
         )
-        uploaded_file = request.files["image"]
-        filename = secure_filename(uploaded_file.filename)
-        if filename != "":
-            file_ext = os.path.splitext(filename)[1]
-            if file_ext not in current_app.config[
-                "UPLOAD_EXTENSIONS"
-            ] or file_ext != validate_image(uploaded_file.stream):
-                abort(400)
-            uploaded_file.save(
-                os.path.join(files_dir, filename)
-            )
-        else:
-            return "Invalid file.", 415
+        offer_images = []
+        for image in form.images.data:
+            original_filename = secure_filename(image.filename)
+            if original_filename != "":
+                file_ext = os.path.splitext(original_filename)[1]
+                if file_ext not in current_app.config[
+                    "UPLOAD_EXTENSIONS"
+                ] or file_ext != validate_image(image.stream):
+                    flash(f'File "{original_filename}" is not a valid image.')
+                    return render_template("offer/newoffer.html", form=form)
+                offer_image = OfferImage(ext=file_ext[1:])
+                db.session.add(offer_image)
+                db.session.commit()
+                offer_images.append(offer_image)
+                image.save(
+                    os.path.join(
+                        files_dir, f"{offer_image.id}.{offer_image.ext}"
+                    )
+                )
+            else:
+                flash("Invalid file uploaded.")
+                return render_template("offer/newoffer.html", form=form)
         db.session.add(offer)
         db.session.commit()
+        for offer_image in offer_images:
+            offer_image.offer_id = offer.id
+        db.session.commit()
         return redirect(url_for(".offer", id=offer.id))
-    return render_template("offer/newoffer.html", form=form, files=files_dir)
+    return render_template("offer/newoffer.html", form=form)
 
 
-@offer_bp.route("/uploads/<filename>")
-def upload(filename):
-    return send_from_directory(current_app.config["UPLOAD_PATH"], filename)
+@offer_bp.route("/images/<int:id>.<ext>")
+def offer_image(id, ext):
+    return send_from_directory(
+        "../" + current_app.config["UPLOAD_PATH"] + "/offers", f"{id}.{ext}"
+    )
 
 
 @offer_bp.route("/<int:id>")
