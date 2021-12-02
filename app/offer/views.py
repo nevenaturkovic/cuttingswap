@@ -41,7 +41,7 @@ def new_offer():
         for image in form.images.data:
             original_filename = secure_filename(image.filename)
             if original_filename != "":
-                file_ext = os.path.splitext(original_filename)[1]
+                file_ext = os.path.splitext(original_filename)[1].lower()
                 if file_ext not in current_app.config[
                     "UPLOAD_EXTENSIONS"
                 ] or file_ext != validate_image(image.stream):
