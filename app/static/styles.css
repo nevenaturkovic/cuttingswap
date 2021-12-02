@@ -28,6 +28,9 @@ ul.posts li.post:hover {
 div.post-date {
     float: right;
 }
+div.post-title {
+    font-weight: bold;
+}
 div.post-author {
     font-weight: bold;
 }
