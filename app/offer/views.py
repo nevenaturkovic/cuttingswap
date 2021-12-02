@@ -85,5 +85,17 @@ def offer(id):
 @offer_bp.route("/")
 @login_required
 def list_of_offers():
-    offers = Offer.query.order_by(Offer.timestamp.desc()).all()
-    return render_template("offer/alloffers.html", offer=offer, offers=offers)
+    query = Offer.query
+    page = request.args.get("page", 1, type=int)
+    pagination = query.order_by(Offer.timestamp.desc()).paginate(
+        page,
+        per_page=current_app.config["CUTTINGSWAP_POSTS_PER_PAGE"],
+        error_out=False,
+    )
+    offers = pagination.items
+    return render_template(
+        "offer/alloffers.html",
+        offers=offers,
+        pagination=pagination,
+        oischema=OfferImage
+    )
