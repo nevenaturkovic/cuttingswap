@@ -5,10 +5,8 @@
 {% block title %}CuttingSwap - Add New Offer{% endblock %}
 
 {% block page_content %}
-<div class="page-header">
-    <h1>Add New Offer</h1>
-</div>
-<div class="col-md-4">
-    {{ wtf.quick_form(form, enctype="multipart/form-data") }}
-</div>
+
+<h1>Add New Offer</h1>
+{{ wtf.quick_form(form, enctype="multipart/form-data") }}
+
 {% endblock %}
