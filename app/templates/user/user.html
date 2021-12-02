@@ -32,4 +32,23 @@
         </p>
     </div>
 </div>
+<br>
+
+<h3>Offers by {{ user.username }}</h3>
+<ul class="posts">
+    {% for offer in offers %}
+    <li class="post">
+        <div class="post-title"><a href="{{ url_for('offer.offer', id=offer.id) }}">
+                {{ offer.title }}
+            </a></div>
+        <div class="post-date">{{ moment(offer.timestamp).fromNow() }}</div>
+        <div class="post-body">{{ offer.body }}</div>
+        <div class="post-author">
+            <p>Posted by: <a href="{{ url_for('user.user', username=offer.author.username) }}">
+                    {{ offer.author.username }}
+                </a></p>
+        </div>
+    </li>
+    {% endfor %}
+</ul>
 {% endblock %}
