@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% import "_macros.html" as macros %}
 
 {% block title %}List of Offers{% endblock %}
 
@@ -9,8 +10,10 @@
     <li class="post">
         <div class="post-thumbnail">
             <a href="{{ url_for('.offer', id=offer.id) }}">
-                <img class="img-rounded profile-thumbnail"
-                    src="(size=40)">
+                {% set oimg = offer.images.order_by(oischema.id.asc()).first() %}
+                {% if oimg %}
+                <img class="img-rounded profile-thumbnail" src="{{ url_for('.offer_image', id=oimg.id, ext=oimg.ext) }}" width="40px">
+                {% endif %}
             </a>
         </div>
         <div class="post-content">
@@ -28,4 +31,9 @@
     </li>
     {% endfor %}
 </ul>
+{% if pagination %}
+<div class="pagination">
+    {{ macros.pagination_widget(pagination, '.list_of_offers') }}
+</div>
+{% endif %}
 {% endblock %}
