@@ -13,6 +13,7 @@ from . import user as user_
 from .. import db
 from ..decorators import admin_required
 from ..decorators import permission_required
+from ..models import Offer
 from ..models import Permission
 from ..models import Role
 from ..models import User
@@ -24,7 +25,12 @@ from .forms import EditProfileForm
 def user(username):
     user = User.query.filter_by(username=username).first_or_404()
     page = request.args.get("page", 1, type=int)
-    return render_template("user/user.html", user=user)
+    offers = (
+        Offer.query.filter_by(author_id=user.id)
+        .order_by(Offer.timestamp.desc())
+        .all()
+    )
+    return render_template("user/user.html", user=user, offers=offers)
 
 
 @user_.route("/edit-profile", methods=["GET", "POST"])
