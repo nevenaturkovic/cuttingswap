@@ -24,7 +24,7 @@ class Config:
     MAX_CONTENT_LENGTH = (
         int(os.environ.get("MAX_CONTENT_LENGTH"))
         if os.environ.get("MAX_CONTENT_LENGTH")
-        else 5 * 1024 * 1024
+        else 15 * 1024 * 1024
     )
     UPLOAD_EXTENSIONS = (
         set(os.environ.get("UPLOAD_EXTENSIONS").split(";"))
