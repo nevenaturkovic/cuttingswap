@@ -34,6 +34,7 @@ def new_offer():
         offer = Offer(
             title=form.title.data,
             body=form.body.data,
+            location=form.location.data,
             author=current_user._get_current_object(),
         )
         offer_images = []

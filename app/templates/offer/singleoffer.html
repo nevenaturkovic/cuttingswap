@@ -3,21 +3,45 @@
 
 {% block title %}CuttingSwap - {{ offer.title }}{% endblock %}
 
+{% block styles %}
+{{ super() }}
+<link rel="stylesheet" href="{{url_for('static', filename='gallery.css')}}">
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/baguettebox.js/1.8.1/baguetteBox.min.js"></script>
+<script>
+    baguetteBox.run('.tz-gallery');
+</script>
+{{ super() }}
+{% endblock %}
+
 {% block page_content %}
-<div class="page-header">
-    <img class="img-rounded profile-thumbnail" src="{{ offer.author.gravatar(size=256) }}">
-    <div class="profile-header">
-        <h1>{{ offer.title }}</h1>
-        <div class="post-body">{{ offer.body }}</div>
-        {% for image in offer.images.all() %}
-            <img src={{ url_for(".offer_image", id=image.id, ext=image.ext) }}></br>
-            {{ image.ext }}
-        {% endfor %}        
-        <div class="post-date">{{ moment(offer.timestamp).fromNow() }}</div>
-        <div class="post-author">
-            <a href="{{ url_for('user.user', username=offer.author.username) }}">
-                {{ offer.author.username }}
+<h1 class="text-center">{{ offer.title }}</h1>
+{% for image in offer.images.all() %}
+<div class="tz-gallery">
+    <div class="row">
+        <div class="col-sm-12 col-md-4">
+            <a class="lightbox" <img src={{ url_for(".offer_image", id=image.id, ext=image.ext) }}>
             </a>
+            </br>
         </div>
     </div>
-    {% endblock %}
+</div>
+{% endfor %}
+<p class="post-content">{{ offer.body }}</p>
+<div class="post-date">
+    {{ moment(offer.timestamp).fromNow() }}
+</div>
+<div class="post-author">
+    <p>Posted by:
+        <a href="{{ url_for('user.user', username=offer.author.username) }}">
+            {{ offer.author.username }}
+        </a>
+    <p>Location:
+        <a href="http://maps.google.com/?q={{ offer.location }}">{{ offer.location }}</a>
+    </p>
+    </p>
+</div>
+
+{% endblock %}

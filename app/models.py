@@ -221,6 +221,7 @@ class Offer(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.Text)
     body = db.Column(db.Text)
+    location = db.Column(db.Text)
     images = db.relationship("OfferImage", backref="offer", lazy="dynamic")
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     author_id = db.Column(db.Integer, db.ForeignKey("users.id"))
