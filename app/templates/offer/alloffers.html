@@ -5,32 +5,7 @@
 
 {% block page_content %}
 <h1>All Offers</h1>
-<ul class="posts">
-    {% for offer in offers %}
-    <li class="post">
-        <div class="post-thumbnail">
-            <a href="{{ url_for('.offer', id=offer.id) }}">
-                {% set oimg = offer.images.order_by(oischema.id.asc()).first() %}
-                {% if oimg %}
-                <img class="img-rounded profile-thumbnail" src="{{ url_for('.offer_image', id=oimg.id, ext=oimg.ext) }}" width="40px">
-                {% endif %}
-            </a>
-        </div>
-        <div class="post-content">
-            <div class="post-title"><a href="{{ url_for('.offer', id=offer.id) }}">
-                    {{ offer.title }}
-                </a></div>
-            <div class="post-date">{{ moment(offer.timestamp).fromNow() }}</div>
-            <div class="post-body">{{ offer.body }}</div>
-            <div class="post-author">
-                <p>Posted by: <a href="{{ url_for('user.user', username=offer.author.username) }}">
-                        {{ offer.author.username }}
-                    </a></p>
-            </div>
-        </div>
-    </li>
-    {% endfor %}
-</ul>
+{% include 'offer/_offers.html' %}
 {% if pagination %}
 <div class="pagination">
     {{ macros.pagination_widget(pagination, '.list_of_offers') }}
