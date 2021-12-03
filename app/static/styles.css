@@ -5,7 +5,7 @@
     min-height: 260px;
     margin-left: 280px;
 }
-div.post-tabs {
+div.offer-tabs {
     margin-top: 16px;
 }
 ul.posts {
@@ -14,7 +14,7 @@ ul.posts {
     margin: 16px 0px 0px 0px;
     border-top: 1px solid #e0e0e0;
 }
-div.post-tabs ul.posts {
+div.offer-tabs ul.posts {
     margin: 0px;
     border-top: none;
 }
@@ -25,23 +25,26 @@ ul.posts li.post {
 ul.posts li.post:hover {
     background-color: #f0f0f0;
 }
-div.post-date {
+div.offer-date {
     float: right;
 }
-div.post-title {
+div.offer-title {
     font-weight: bold;
 }
-div.post-author {
+div.offer-author {
     font-weight: bold;
 }
-div.post-thumbnail {
+div.offer-thumbnail {
     position: absolute;
 }
-div.post-content {
-    margin-left: 48px;
-    min-height: 48px;
+div.offer-thumbnail img {
+    width: 60px;
 }
-div.post-footer {
+div.offer-content {
+    margin-left: 64px;
+    min-height: 64px;
+}
+div.offer-footer {
     text-align: right;
 }
 ul.comments {
@@ -96,13 +99,13 @@ div.flask-pagedown-preview h2 {
 div.flask-pagedown-preview h3 {
     font-size: 120%;
 }
-.post-body h1 {
+.offer-body h1 {
     font-size: 140%;
 }
-.post-body h2 {
+.offer-body h2 {
     font-size: 130%;
 }
-.post-body h3 {
+.offer-body h3 {
     font-size: 120%;
 }
 .table.followers tr {
