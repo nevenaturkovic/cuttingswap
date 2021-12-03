@@ -74,6 +74,14 @@ def offer_image(id, ext):
         "../" + current_app.config["UPLOAD_PATH"] + "/offers", f"{id}.{ext}"
     )
 
+@offer_bp.route("/<int:id>/thumbnail")
+def thumbnail(id):
+    offer = Offer.query.get_or_404(id)
+    image = offer.images.order_by(OfferImage.id.asc()).first()
+    if image:
+        return redirect(url_for('.offer_image', id=image.id, ext=image.ext))
+    return redirect(url_for('static', filename='no_image.svg'))
+
 
 @offer_bp.route("/<int:id>")
 @login_required
