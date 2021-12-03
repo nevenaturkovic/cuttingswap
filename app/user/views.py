@@ -14,6 +14,7 @@ from .. import db
 from ..decorators import admin_required
 from ..decorators import permission_required
 from ..models import Offer
+from ..models import OfferImage
 from ..models import Permission
 from ..models import Role
 from ..models import User
@@ -24,13 +25,21 @@ from .forms import EditProfileForm
 @user_.route("/<username>")
 def user(username):
     user = User.query.filter_by(username=username).first_or_404()
+    query = user.offers
     page = request.args.get("page", 1, type=int)
-    offers = (
-        Offer.query.filter_by(author_id=user.id)
-        .order_by(Offer.timestamp.desc())
-        .all()
+    pagination = query.order_by(Offer.timestamp.desc()).paginate(
+        page,
+        per_page=current_app.config["CUTTINGSWAP_POSTS_PER_PAGE"],
+        error_out=False,
     )
-    return render_template("user/user.html", user=user, offers=offers)
+    offers = pagination.items
+    return render_template(
+        "user/user.html",
+        user=user,
+        offers=offers,
+        pagination=pagination,
+        oischema=OfferImage,
+    )
 
 
 @user_.route("/edit-profile", methods=["GET", "POST"])
