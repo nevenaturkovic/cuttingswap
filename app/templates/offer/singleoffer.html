@@ -9,37 +9,62 @@
 {% endblock %}
 
 {% block scripts %}
-<script src="https://cdnjs.cloudflare.com/ajax/libs/baguettebox.js/1.8.1/baguetteBox.min.js"></script>
-<script>
-    baguetteBox.run('.tz-gallery');
-</script>
 {{ super() }}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
 {% endblock %}
 
 {% block page_content %}
-<h1 class="text-center">{{ offer.title }}</h1>
-{% for image in offer.images.all() %}
-<div class="tz-gallery">
-    <div class="row">
-        <div class="col-sm-12 col-md-4">
-            <a class="lightbox" <img src={{ url_for(".offer_image", id=image.id, ext=image.ext) }}>
-            </a>
-            </br>
+
+<h1>{{ offer.title }}</h1>
+
+
+
+<div id="myCarousel" class="carousel slide" data-ride="carousel">
+    <!-- Indicators -->
+    {% if offer.images.count() > 1 %}
+    <ol class="carousel-indicators">
+        {% for image in offer.images.all() %}
+        <li data-target="#myCarousel" data-slide-to="{{loop.index}}" {% if loop.first %} class="active" {% endif %}">
+        </li>
+        {% endfor %}
+    </ol>
+    {% endif %}
+
+    <!-- Wrapper for slides -->
+    <div class="carousel-inner">
+        {% for image in offer.images.all() %}
+        <div class="item{% if loop.first %} active{% endif %}">
+            <img src="{{ url_for(".offer_image", id=image.id, ext=image.ext) }}">
         </div>
+        {% endfor %}
     </div>
+
+    {% if offer.images.count() > 1 %}
+    <!-- Left and right controls -->
+    <a class="left carousel-control" href="#myCarousel" data-slide="prev">
+        <span class="glyphicon glyphicon-chevron-left"></span>
+        <span class="sr-only">Previous</span>
+    </a>
+    <a class="right carousel-control" href="#myCarousel" data-slide="next">
+        <span class="glyphicon glyphicon-chevron-right"></span>
+        <span class="sr-only">Next</span>
+    </a>
+    {% endif %}
+
 </div>
-{% endfor %}
-<p class="post-content">{{ offer.body }}</p>
-<div class="post-date">
-    {{ moment(offer.timestamp).fromNow() }}
-</div>
-<div class="post-author">
-    <p>Posted by:
+
+
+
+<p class="offer-content">{{ offer.body }}</p>
+
+<div>
+    <p><strong>Posted by:</strong>
         <a href="{{ url_for('user.user', username=offer.author.username) }}">
-            {{ offer.author.username }}
-        </a>
-    <p>Location:
-        <a href="http://maps.google.com/?q={{ offer.location }}">{{ offer.location }}</a>
+            {{ offer.author.username }}</a>,
+        <em>{{ moment(offer.timestamp).fromNow() }}</em>
+    <p><strong>Location:</strong>
+        <a href="http://maps.google.com/?q={{offer.location }}">{{ offer.location }}</a>
     </p>
     </p>
 </div>
