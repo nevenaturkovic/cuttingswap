@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+{% import "_macros.html" as macros %}
+
+{% block title %}
+{% if show_subject %}
+New Conversation with {{ username }}
+{% else %}
+New Conversation about offer "{{ offer.title }}"
+{% endif %}
+{% endblock %}
+
+{% block page_content %}
+
+{% if show_subject %}
+<h1>New Conversation with {{ username }}</h1>
+{{ wtf.quick_form(form) }}
+{% else %}
+<h1>New Conversation about offer "{{ offer.title }}"</h1>
+{{ wtf.quick_form(form) }}
+{% endif %}
+
+
+{% endblock %}

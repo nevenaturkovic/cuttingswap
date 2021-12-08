@@ -16,6 +16,8 @@ from . import offer as offer_bp
 from .. import db
 from ..decorators import admin_required
 from ..decorators import permission_required
+from ..models import Conversation
+from ..models import Message
 from ..models import Offer
 from ..models import OfferImage
 from ..models import Permission
@@ -23,6 +25,7 @@ from ..models import Role
 from ..models import User
 from ..utils.image_upload import validate_image
 from .forms import OfferForm
+from ..messages.forms import StartConversationFormFromOffer
 
 
 @offer_bp.route("/new", methods=["GET", "POST"])
@@ -47,23 +50,19 @@ def new_offer():
                 ] or file_ext != validate_image(image.stream):
                     flash(f'File "{original_filename}" is not a valid image.')
                     return render_template("offer/newoffer.html", form=form)
-                offer_image = OfferImage(ext=file_ext[1:])
-                db.session.add(offer_image)
-                db.session.commit()
-                offer_images.append(offer_image)
-                image.save(
-                    os.path.join(
-                        files_dir, f"{offer_image.id}.{offer_image.ext}"
-                    )
-                )
+                offer_images.append((image, file_ext[1:]))
             else:
                 flash("Invalid file uploaded.")
                 return render_template("offer/newoffer.html", form=form)
+        for image, ext in offer_images:
+            offer_image = OfferImage(ext=ext)
+            offer.images.append(offer_image)
+            image.save(
+                os.path.join(files_dir, f"{offer_image.id}.{offer_image.ext}")
+            )
         db.session.add(offer)
         db.session.commit()
-        for offer_image in offer_images:
-            offer_image.offer_id = offer.id
-        db.session.commit()
+
         return redirect(url_for(".offer", id=offer.id))
     return render_template("offer/newoffer.html", form=form)
 
@@ -74,20 +73,41 @@ def offer_image(id, ext):
         "../" + current_app.config["UPLOAD_PATH"] + "/offers", f"{id}.{ext}"
     )
 
+
 @offer_bp.route("/<int:id>/thumbnail")
 def thumbnail(id):
     offer = Offer.query.get_or_404(id)
     image = offer.images.order_by(OfferImage.id.asc()).first()
     if image:
-        return redirect(url_for('.offer_image', id=image.id, ext=image.ext))
-    return redirect(url_for('static', filename='no_image.svg'))
+        return redirect(url_for(".offer_image", id=image.id, ext=image.ext))
+    return redirect(url_for("static", filename="no_image.svg"))
 
 
-@offer_bp.route("/<int:id>")
+@offer_bp.route("/<int:id>", methods=["GET", "POST"])
 @login_required
 def offer(id):
     offer = Offer.query.get_or_404(id)
-    return render_template("offer/singleoffer.html", offer=offer)
+    form = StartConversationFormFromOffer()
+    if form.validate_on_submit():
+        participant_id = offer.author_id
+        conversation = Conversation(
+            initiator_id=current_user.id,
+            participant_id=participant_id,
+            offer_id=offer.id,
+        )
+        message = Message(
+            sender_id=current_user.id,
+            recipient_id=offer.author_id,
+            body=form.message.data,
+        )
+        conversation.messages.append(message)
+        db.session.add(conversation)
+        db.session.commit()
+        return redirect(
+            url_for("messages/single_conversation", id=conversation.id, form=form)
+        )
+
+    return render_template("offer/singleoffer.html", offer=offer, form=form)
 
 
 @offer_bp.route("/")
@@ -105,5 +125,5 @@ def list_of_offers():
         "offer/alloffers.html",
         offers=offers,
         pagination=pagination,
-        oischema=OfferImage
+        oischema=OfferImage,
     )

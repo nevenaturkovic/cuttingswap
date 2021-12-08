@@ -56,7 +56,7 @@
 
 
 
-<p class="offer-content">{{ offer.body }}</p>
+<p class="offer-content">{{ offer.body | safe }}</p>
 
 <div>
     <p><strong>Posted by:</strong>
@@ -69,4 +69,8 @@
     </p>
 </div>
 
+
+{% if offer.author != current_user %}
+<a class="btn btn-default" href="{{ url_for('messages.new_conversation', offer=offer.id) }}">Send Message</a>
+{% endif %}
 {% endblock %}

@@ -8,6 +8,7 @@ from flask_login import AnonymousUserMixin
 from flask_login import UserMixin
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from markdown import markdown
+from sqlalchemy import event
 from werkzeug.security import check_password_hash
 from werkzeug.security import generate_password_hash
 
@@ -84,6 +85,11 @@ class Role(db.Model):
         return "<Role %r>" % self.name
 
 
+@event.listens_for(Role.__table__, "after_create")
+def insert_initial_values(*args, **kwargs):
+    Role.insert_roles()
+
+
 class User(UserMixin, db.Model):
     __tablename__ = "users"
     id = db.Column(db.Integer, primary_key=True)
@@ -99,6 +105,32 @@ class User(UserMixin, db.Model):
     last_seen = db.Column(db.DateTime(), default=datetime.utcnow)
     avatar_hash = db.Column(db.String(32))
     offers = db.relationship("Offer", backref="author", lazy="dynamic")
+    conversations_started = db.relationship(
+        "Conversation",
+        foreign_keys="Conversation.initiator_id",
+        backref="initiator",
+        lazy="dynamic",
+    )
+    conversations_participating = db.relationship(
+        "Conversation",
+        foreign_keys="Conversation.participant_id",
+        backref="participant",
+        lazy="dynamic",
+    )
+    messages_sent = db.relationship(
+        "Message",
+        foreign_keys="Message.sender_id",
+        backref="sender",
+        lazy="dynamic",
+    )
+    messages_received = db.relationship(
+        "Message",
+        foreign_keys="Message.recipient_id",
+        backref="recipient",
+        lazy="dynamic",
+    )
+
+    last_message_read_time = db.Column(db.DateTime)
 
     def __init__(self, **kwargs):
         super(User, self).__init__(**kwargs)
@@ -109,6 +141,14 @@ class User(UserMixin, db.Model):
                 self.role = Role.query.filter_by(default=True).first()
         if self.email is not None and self.avatar_hash is None:
             self.avatar_hash = self.gravatar_hash()
+
+    def new_messages(self):
+        last_read_time = self.last_message_read_time or datetime(1900, 1, 1)
+        return (
+            Message.query.filter_by(recipient=self)
+            .filter(Message.timestamp > last_read_time)
+            .count()
+        )
 
     @property
     def password(self):
@@ -225,6 +265,12 @@ class Offer(db.Model):
     images = db.relationship("OfferImage", backref="offer", lazy="dynamic")
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     author_id = db.Column(db.Integer, db.ForeignKey("users.id"))
+    conversations = db.relationship(
+        "Conversation",
+        foreign_keys="Conversation.offer_id",
+        backref="offer",
+        lazy="dynamic",
+    )
 
 
 class OfferImage(db.Model):
@@ -232,3 +278,33 @@ class OfferImage(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     ext = db.Column(db.String(6), nullable=False)
     offer_id = db.Column(db.Integer, db.ForeignKey("offers.id"))
+
+
+class Message(db.Model):
+    __tablename__ = "messages"
+    id = db.Column(db.Integer, primary_key=True)
+    sender_id = db.Column(db.Integer, db.ForeignKey("users.id"))
+    recipient_id = db.Column(db.Integer, db.ForeignKey("users.id"))
+    body = db.Column(db.Text)
+    timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    conversation_id = db.Column(db.Integer, db.ForeignKey("conversations.id"))
+
+    def __repr__(self):
+        return f"<Message {self.body}>"
+
+
+class Conversation(db.Model):
+    __tablename__ = "conversations"
+    id = db.Column(db.Integer, primary_key=True)
+    initiator_id = db.Column(db.Integer, db.ForeignKey("users.id"))
+    participant_id = db.Column(db.Integer, db.ForeignKey("users.id"))
+    messages = db.relationship(
+        "Message", backref="conversation", lazy="dynamic"
+    )
+    subject = db.Column(db.String(60))
+    offer_id = db.Column(db.Integer, db.ForeignKey("offers.id"))
+
+    @property
+    def latest_message(self):
+        return self.messages.order_by(Message.timestamp.desc()).first()
+        

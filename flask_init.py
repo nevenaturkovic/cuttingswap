@@ -9,10 +9,11 @@ from app.models import Offer
 from app.models import Permission
 from app.models import Role
 from app.models import User
+from app.models import Message
 
 
 app = create_app(os.getenv("FLASK_CONFIG") or "default")
-migrate = Migrate(app, db)
+migrate = Migrate(app, db, render_as_batch=True)
 
 
 @app.shell_context_processor
@@ -23,6 +24,7 @@ def make_shell_context():
         "Role": Role,
         "Permission": Permission,
         "Offer": Offer,
+        "Message": Message,
     }
 
 

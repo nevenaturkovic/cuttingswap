@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+{% import "_macros.html" as macros %}
+
+{% block title %}
+{% if conversation.subject %}
+Conversation "{{ conversation.subject }}"
+{% endif %}
+{% if conversation.offer_id %}
+Conversation about offer "{{ conversation.offer.title }}"
+{% endif %}
+{% endblock %}
+
+{% block page_content %}
+
+{% if conversation.subject %}
+<h1>Conversation "{{ conversation.subject }}"</h1>
+{% endif %}
+{% if conversation.offer_id %}
+<h1>Conversation about offer "{{ conversation.offer.title }}"</h1>
+{% endif %}
+
+{% for message in conversation.messages %}
+{{ message.sender.username }} ({{ moment(message.timestamp).fromNow() }}):
+{{ message.body | safe }}
+<br>
+{% endfor %}
+
+{{ wtf.quick_form(form) }}
+
+{% endblock %}

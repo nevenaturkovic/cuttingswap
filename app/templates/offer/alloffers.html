@@ -5,6 +5,9 @@
 
 {% block page_content %}
 <h1>All Offers</h1>
+<h3><a href="{{ url_for('offer.new_offer') }}" class="post-title">
+    <p>Whoud you like to offer something?</p>
+</a></h3>
 {% include 'offer/_offers.html' %}
 {% if pagination %}
 <div class="pagination">

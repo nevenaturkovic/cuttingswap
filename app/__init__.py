@@ -46,4 +46,8 @@ def create_app(config_name):
 
     app.register_blueprint(offer_blueprint, url_prefix="/offer")
 
+    from .messages import messages as messages_blueprint
+
+    app.register_blueprint(messages_blueprint, url_prefix="/messages")
+
     return app
