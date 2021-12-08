@@ -3,29 +3,56 @@
 {% import "_macros.html" as macros %}
 
 {% block title %}
-{% if conversation.subject %}
-Conversation "{{ conversation.subject }}"
-{% endif %}
-{% if conversation.offer_id %}
-Conversation about offer "{{ conversation.offer.title }}"
-{% endif %}
+    {% if conversation.subject %}
+        Conversion "{{ conversation.subject }}"
+    {% endif %}
+    {% if conversation.offer_id %}
+        Conversation about offer "{{ conversation.offer.title }}"
+    {% endif %}
 {% endblock %}
 
+{% block styles %}
+    {{ super() }}
+    <link rel="stylesheet" href="{{url_for('static', filename='messages.css')}}">
+{% endblock %}
+
+
 {% block page_content %}
+    {% set interlocutor = conversation.initiator if conversation.initiator != current_user else conversation.participant%}
+  
+    {% if conversation.subject %}
+        <h1>Conversation "{{ conversation.subject }}"</h1>
+    {% endif %}
+    {% if conversation.offer_id %}
+        <h1>Conversation about offer "{{ conversation.offer.title }}"</h1>
+    {% endif %}
 
-{% if conversation.subject %}
-<h1>Conversation "{{ conversation.subject }}"</h1>
-{% endif %}
-{% if conversation.offer_id %}
-<h1>Conversation about offer "{{ conversation.offer.title }}"</h1>
-{% endif %}
+    {% for message in conversation.messages %}
+        {% if message.sender == current_user  %}
+            {% set div_class = ' darker' %}
+            {% set image_tag = 'right' %}
+            {% set time_orientation = 'left' %}
+        {% else %}
+            {% set time_orientation = 'right' %}
+        {% endif %}
 
-{% for message in conversation.messages %}
-{{ message.sender.username }} ({{ moment(message.timestamp).fromNow() }}):
-{{ message.body | safe }}
-<br>
-{% endfor %}
+        <div class="message_container{{div_class}}">
+            <div class="message_avatar {{image_tag}}">
 
-{{ wtf.quick_form(form) }}
+                <a href="{{ url_for('user.user', username=message.sender.username) }}">
+                    <img src="{{ message.sender.gravatar(size=60) }}" class="img-responsive center-block">
+                </a>
+                <div class="caption center-block">
+                    <a class="username" href="{{ url_for('user.user', username=message.sender.username) }}">
+                        {{ message.sender.username }}
+                    </a>
+                </div>
+            </div>
+            <p>{{ message.body | safe }}</p>
+            <span class="time-{{time_orientation}}">{{ moment(message.timestamp).fromNow() }}</span>
+        </div>
+    {% endfor %}
+
+    {{ wtf.quick_form(form) }}
 
 {% endblock %}
