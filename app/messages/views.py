@@ -1,29 +1,34 @@
 from flask import abort
+from flask import current_app
 from flask import redirect
 from flask import render_template
 from flask import request
-from flask import current_app
 from flask import url_for
 from flask_login import current_user
 from flask_login import login_required
+from sqlalchemy import or_
+
 from . import messages as messages_bp
 from .. import db
+from ..models import Conversation
 from ..models import Message
 from ..models import Offer
-from ..models import Conversation
 from ..models import User
+from .forms import MessageForm
 from .forms import StartConversationForm
 from .forms import StartConversationFormFromOffer
-from .forms import MessageForm
 
 
 @messages_bp.route("/")
 @login_required
 def all_conversations():
     query = Conversation.query.filter(
-        Conversation.initiator_id == current_user.id
-        or Conversation.participant_id == current_user.id
+        or_(
+            Conversation.initiator_id == current_user.id,
+            Conversation.participant_id == current_user.id,
+        )
     )
+    print(query.all())
     page = request.args.get("page", 1, type=int)
     pagination = query.paginate(
         page,
