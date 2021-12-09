@@ -1,7 +1,17 @@
 {% extends "base.html" %}
 
-{% block title %}CuttingSwap - Homepage{% endblock %}
+{% block title %}CuttingSwap{% endblock %}
 
 {% block page_content %}
+<h1>Welcome to CuttingSwap!</h1>
 
+<div>
+    <p>Connect with people who adore plants! </p> <br>
+
+    <p>Would you like to swap some cuttings?</p><br>
+
+    <h3><a href="{{ url_for('offer.new_offer') }}" class="post-title">
+            <p>What do you offer?</p>
+        </a></h3>
+</div>
 {% endblock %}
