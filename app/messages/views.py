@@ -125,7 +125,9 @@ def _new_conversation_regarding_offer(offer_id):
         initiator_id=initiator_id, offer_id=offer_id
     ).first()
     if existing_conversation:
-        return redirect(".single_conversation", id=existing_conversation.id)
+        return redirect(
+            url_for(".single_conversation", id=existing_conversation.id)
+        )
 
     form = StartConversationFormFromOffer()
     if form.validate_on_submit():
