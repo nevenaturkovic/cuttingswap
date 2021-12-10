@@ -54,14 +54,17 @@ def new_offer():
             else:
                 flash("Invalid file uploaded.")
                 return render_template("offer/newoffer.html", form=form)
+        offer_images_db = []
         for image, ext in offer_images:
             offer_image = OfferImage(ext=ext)
             offer.images.append(offer_image)
-            image.save(
-                os.path.join(files_dir, f"{offer_image.id}.{offer_image.ext}")
-            )
+            offer_images_db.append((image, offer_image))
         db.session.add(offer)
         db.session.commit()
+        for image, row in offer_images_db:
+            image.save(
+                os.path.join(files_dir, f"{row.id}.{row.ext}")
+            )
 
         return redirect(url_for(".offer", id=offer.id))
     return render_template("offer/newoffer.html", form=form)
@@ -104,7 +107,9 @@ def offer(id):
         db.session.add(conversation)
         db.session.commit()
         return redirect(
-            url_for("messages/single_conversation", id=conversation.id, form=form)
+            url_for(
+                "messages/single_conversation", id=conversation.id, form=form
+            )
         )
 
     return render_template("offer/singleoffer.html", offer=offer, form=form)
@@ -114,6 +119,29 @@ def offer(id):
 @login_required
 def list_of_offers():
     query = Offer.query
+
+    try:
+        location = request.args["location"]
+        if location:
+            query = query.filter(Offer.location.ilike(f"%{location}%"))
+    except KeyError:
+        pass
+
+    try:
+        title = request.args["title"]
+        if title:
+            query = query.filter(Offer.title.ilike(f"%{title}%"))
+    except KeyError:
+        pass
+
+    own = False
+    try:
+        own = request.args["own"] == "yes"
+    except KeyError:
+        pass
+    if not own:
+        query = query.filter(Offer.author_id != current_user.id)
+
     page = request.args.get("page", 1, type=int)
     pagination = query.order_by(Offer.timestamp.desc()).paginate(
         page,
