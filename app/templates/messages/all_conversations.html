@@ -7,13 +7,16 @@
 <h1>Conversations</h1>
 <ul class="messages">
     {% for conversation in conversations %}
-    {% set interlocutor = conversation.initiator if conversation.initiator != current_user else conversation.participant%}
-    
+    {% set initiator = User.query.get_or_404(conversation.initiator_id) %}
+    {% set participant = User.query.get_or_404(conversation.participant_id)%}
+    {% set interlocutor = initiator if initiator != current_user else participant %}
+      
     {% if conversation.subject %}
     {% set title = conversation.subject %}
     {% endif %}
     {% if conversation.offer_id %}
-    {% set title = conversation.offer.title %}
+    {% set offer = Offer.query.get_or_404(conversation.offer_id) %}
+    {% set title = offer.title %}
     {% endif %}
 
     <li class="message">
@@ -26,8 +29,9 @@
             <div class="message-title"><a href="{{ url_for('messages.single_conversation', id=conversation.id) }}">
                     {{ title }}
                 </a></div>
-            <div class="message-date">{{ moment(conversation.latest_message.timestamp).fromNow() }}</div>
-            <div class="message-body">{{ conversation.latest_message.body | safe | truncate(50, end='…') }}</div>
+            <div class="message-date">{{ moment(conversation.latest_message_timestamp).fromNow() }}</div>
+            {% set latest_message_body = Message.query.filter_by(conversation_id=conversation.id).order_by(Message.timestamp.desc()).first().body %}
+            <div class="message-body">{{ latest_message_body | safe | truncate(50, end='…') }}</div>
             <div class="message-author">
                 <p>Posted by: <a href="{{ url_for('user.user', username=interlocutor.username) }}">
                         {{ interlocutor.username }}

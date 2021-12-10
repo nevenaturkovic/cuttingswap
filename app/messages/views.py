@@ -6,7 +6,7 @@ from flask import request
 from flask import url_for
 from flask_login import current_user
 from flask_login import login_required
-from sqlalchemy import or_
+from sqlalchemy import or_, func, desc
 
 from . import messages as messages_bp
 from .. import db
@@ -22,11 +22,26 @@ from .forms import StartConversationFormFromOffer
 @messages_bp.route("/")
 @login_required
 def all_conversations():
-    query = Conversation.query.filter(
-        or_(
-            Conversation.initiator_id == current_user.id,
-            Conversation.participant_id == current_user.id,
+    query = (
+        Conversation.query.join(
+            Message, Message.conversation_id == Conversation.id
         )
+        .with_entities(
+            Conversation.id,
+            Conversation.initiator_id,
+            Conversation.participant_id,
+            Conversation.subject,
+            Conversation.offer_id,
+            func.max(Message.timestamp).label("latest_message_timestamp"),
+        )
+        .group_by(Conversation.id)
+        .filter(
+            or_(
+                Conversation.initiator_id == current_user.id,
+                Conversation.participant_id == current_user.id,
+            )
+        )
+        .order_by(desc(func.max(Message.timestamp)))
     )
     print(query.all())
     page = request.args.get("page", 1, type=int)
@@ -40,6 +55,9 @@ def all_conversations():
         "messages/all_conversations.html",
         conversations=conversations,
         pagination=pagination,
+        User=User,
+        Message=Message,
+        Offer=Offer
     )
 
 
