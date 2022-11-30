@@ -1,4 +1,4 @@
-# CUTTINGSWAP
+# CuttingSwap
 
 #### Description:
 
